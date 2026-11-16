@@ -1,0 +1,57 @@
+# ZyonAHouseAddon - multi-server bridge for zAuctionHouse.
+# Requires: zAuctionHouse with storage-type MARIADB pointing to ONE database SHARED by every server, and Redis.
+
+# UNIQUE per server (survival-1, skyblock-1...). Two servers with the same id would ignore each other's events.
+# The addon refuses to start while this is empty or still "CHANGE_ME".
+server-id: "CHANGE_ME"
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  user: ""
+  password: ""
+  database: 0
+  ssl: false
+  timeout-ms: 3000
+  # Prefix of every key and channel. Use a different one per network.
+  prefix: "zah"
+
+lock:
+  # Lock lease. The plugin renews it while an operation runs; if this server dies, the lock frees itself.
+  lease-ms: 30000
+  # Retention of the "sold / removed / deleted" marks. DB remains the arbiter; this only rejects quickly.
+  terminal-state-ttl-hours: 720
+
+events:
+  # Window during which an already processed event id is discarded (duplicate protection).
+  dedupe-window-seconds: 120
+  # Safety net: every N minutes this server reloads its items from the database, so a missed event heals
+  # itself. 0 disables it. Raise it (or disable) on very large auction houses.
+  periodic-resync-minutes: 10
+
+debug: false
+
+# Every text the addon shows (MiniMessage: https://docs.advntr.dev/minimessage). Edit freely, then run
+# /zahredis reload on any server: it re-reads these texts on every server without a restart.
+# A key you delete falls back to its default. Placeholders are written like <item>.
+messages:
+  prefix: "<gradient:#f5a623:#f8d66d><bold>Auction</bold></gradient> <dark_gray>»</dark_gray> "
+
+  # Sent to a seller connected to ANOTHER server than the one where the action happened.
+  # item-sold: <item> <buyer> <price>      item-expired: <item>
+  item-sold: "<green>Your <white><item></white> was bought by <white><buyer></white> for <gold><price></gold>."
+  item-expired: "<yellow>Your listing <white><item></white> is no longer on sale. Claim it in the auction house.</yellow>"
+
+  # /zahredis
+  admin-only: "<red>You do not have permission."
+  usage: "<gray>Usage: /zahredis [status|resync|reload]"
+  status-header: "<gray>Server <white><server></white> · Redis: <redis> · Mode: <mode>"
+  status-connected: "<green>connected</green>"
+  status-down: "<red>DOWN (operations are refused)</red>"
+  status-mode: "distributed"
+  resync-started: "<yellow>Resync started on every server...</yellow>"
+  resync-done: "<green>Resync done.</green>"
+  resync-failed: "<red>Resync failed, see the console.</red>"
+  reload-started: "<yellow>Reloading zAuctionHouse on every server...</yellow>"
+  reload-done: "<green>Reload sent to every server.</green>"
+  reload-failed: "<red>Reload failed, see the console.</red>"

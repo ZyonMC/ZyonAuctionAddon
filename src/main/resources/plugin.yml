@@ -1,0 +1,22 @@
+name: ZyonAHouseAddon
+version: '${version}'
+main: net.zyonmc.zyonahouseaddon.ZyonAHouseAddonPlugin
+api-version: '1.21'
+authors: [sebastiancheikh]
+description: Multi-server bridge for zAuctionHouse (Redis + shared MariaDB).
+depend: [zAuctionHouse]
+
+# Paper downloads this library at startup (it is not shaded into the jar).
+libraries:
+  - io.lettuce:lettuce-core:6.5.5.RELEASE
+
+commands:
+  zahredis:
+    description: Cluster status, manual resync and network-wide reload.
+    permission: zyonahouseaddon.admin
+    usage: /<command> <status|resync|reload>
+
+permissions:
+  zyonahouseaddon.admin:
+    description: Manage the multi-server addon.
+    default: op
